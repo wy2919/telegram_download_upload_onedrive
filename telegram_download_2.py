@@ -132,7 +132,7 @@ async def worker(name):
         chat_title = queue_item[5]
 
 
-        print(f"{name}  {get_local_time()} 开始下载： {chat_title} - {file_name} - {message.id}")
+        print(f"{name}  {get_local_time()} 开始下载： {chat_title} - {file_name} - {str(message.id)}")
 
         # 拼接文件保存路径
         file_save_path = file_name
@@ -179,13 +179,13 @@ async def worker(name):
 
 
 # 接受到/sl  查询队列数量
-@events.register(events.NewMessage(pattern='/sl'+K_ID, from_users=admin_id))
+@events.register(events.NewMessage(pattern='/sl'+str(K_ID), from_users=admin_id))
 async def get_size(update):
-    await bot.send_message(admin_id, f'任务队列数量：{queue.qsize()} 消息id：{dq}')
+    await bot.send_message(admin_id, f'任务队列数量：{queue.qsize()} 消息id：{str(dq)}')
 
 
 # 接受到/start
-@events.register(events.NewMessage(pattern='/start'+K_ID, from_users=admin_id))
+@events.register(events.NewMessage(pattern='/start'+str(K_ID), from_users=admin_id))
 async def handler(update):
     # tg接受到的命令 ：/start https://t.me/chigua91 10
     # 分割好
