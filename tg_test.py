@@ -135,7 +135,7 @@ async def worker(name):
 
         # 拼接文件保存路径
         # file_save_path = file_name
-        file_save_path = save_path + '/' +chat_title+'/'+ file_type + file_name
+        file_save_path = save_path + '/' + chat_title + '/' + file_type + '/' + file_name
 
 
         try:
