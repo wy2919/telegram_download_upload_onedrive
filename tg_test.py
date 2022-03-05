@@ -27,7 +27,7 @@ api_hash = '03e02666b77ced60cab759d4c31c488d'  # api hash
 bot_token = '5285482606:AAHIerhotb28ozU1L3UCS4kyfFLNZM3PA7o'  # bot_token
 admin_id = 1762277767  # 我的id  去这个机器人获取：@getidsbot
 upload_file_set = True  # 是否上传网盘
-max_num = 7  # 同时下载数量
+max_num = 10  # 同时下载数量
 # filter file name/文件名过滤
 filter_list = ['你好，欢迎加入 Quantumu', '\n']
 # filter chat id /过滤某些频道不下载
@@ -131,9 +131,11 @@ async def worker(name):
 
         print(f"{name}  {get_local_time()} 开始下载： {chat_title} - {file_name} - {str(message.id)}")
 
+        file_type = str(os.path.splitext(file_name)[-1]).split('.')[1]
+
         # 拼接文件保存路径
         # file_save_path = file_name
-        file_save_path = save_path + '/' + file_name
+        file_save_path = save_path + '/' +chat_title+'/'+ file_type + file_name
 
 
         try:
@@ -156,8 +158,7 @@ async def worker(name):
             await bot.send_message(admin_id, f'{e.__class__}!\n\n{e}\n\n{file_name}')
         finally:
             queue.task_done()
-            # 无论是否上传成功都删除文件。
-            # os.remove(file_save_path)
+            # 关闭文件
             os.close(file_save_path)
 
 
