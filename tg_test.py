@@ -264,7 +264,7 @@ async def handler(update):
 
             # 监听任务队列长度 因为一个频道有的好几万消息 不可能全部加入到队列
             # 只能一次加入多少 然后等待队列中的任务消耗完毕在继续添加
-            if queue.qsize() == 10:
+            if queue.qsize() == 2:
                 # 阻塞调用线程，直到队列中的所有任务被处理掉。
                 await queue.join()
                 dq = message.id
