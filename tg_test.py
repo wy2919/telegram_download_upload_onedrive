@@ -143,7 +143,7 @@ async def worker(name):
             queue.task_done()
             # loop = asyncio.get_event_loop()
             # # 开启下载
-            
+
             task = loop.create_task(client.download_media(message, file_save_path))
             # 等待阻塞 等待下载
             await asyncio.wait_for(task, timeout=1200)
@@ -303,8 +303,7 @@ async def handler(update):
                     file_id = message.media.document.id
 
                 # 查询数据库 没有下载过才下载
-                if True:
-                    # if get(file_id):
+                if get(file_id):
                     # 生成文件名 不含后缀
                     caption = ''.join(str(uuid.uuid4()).split('-'))
 
