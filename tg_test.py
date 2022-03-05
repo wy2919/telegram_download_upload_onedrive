@@ -260,8 +260,9 @@ async def handler(update):
 
         # 获取频道的消息 参数1：频道实体 参数2：从第几个消息开始获取 reverse（True/False）：true从最久远的消息到现在 false从现在往之前获取
         # filter：消息过滤器（只获取照片和视频），详情：https://tl.telethon.dev/constructors/input_messages_filter_photos.html
+        # async for message in client.iter_messages(entity, offset_id=offset_id, reverse=True, limit=None,
         async for message in client.iter_messages(entity, offset_id=offset_id, reverse=True, limit=None,
-                                                  filter=InputMessagesFilterPhotoVideo):
+                                                  filter=InputMessagesFilterPhotos):
 
             # 监听任务队列长度 因为一个频道有的好几万消息 不可能全部加入到队列
             # 只能一次加入多少 然后等待队列中的任务消耗完毕在继续添加
