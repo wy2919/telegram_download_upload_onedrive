@@ -150,7 +150,7 @@ async def worker(name):
             # os.close(file_save_path)
 
             # 插入数据库
-            pd = set(file_type, file_name, file_save_path, chat_title, chat_id, file_id)
+            # pd = set(file_type, file_name, file_save_path, chat_title, chat_id, file_id)
 
         except (errors.rpc_errors_re.FileReferenceExpiredError, asyncio.TimeoutError):
             logging.warning(f'{get_local_time()} - {file_name} 出现异常，重新尝试下载！')
@@ -265,7 +265,7 @@ async def handler(update):
 
             # 监听任务队列长度 因为一个频道有的好几万消息 不可能全部加入到队列
             # 只能一次加入多少 然后等待队列中的任务消耗完毕在继续添加
-            if queue.qsize() == 3:
+            if queue.qsize() == 50:
                 # 阻塞调用线程，直到队列中的所有任务被处理掉。
                 await queue.join()
                 dq = message.id
@@ -303,7 +303,8 @@ async def handler(update):
                     file_id = message.media.document.id
 
                 # 查询数据库 没有下载过才下载
-                if get(file_id):
+                if True:
+                # if get(file_id):
                     # 生成文件名 不含后缀
                     caption = ''.join(str(uuid.uuid4()).split('-'))
 
