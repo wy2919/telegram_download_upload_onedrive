@@ -268,6 +268,8 @@ async def handler(update):
                 # 阻塞调用线程，直到队列中的所有任务被处理掉。
                 await queue.join()
                 dq = message.id
+                print("继续获取任务......................")
+
 
             # 判断是否是媒体类型
             if message.media:
