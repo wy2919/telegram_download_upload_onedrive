@@ -140,7 +140,7 @@ async def worker(name):
             task = loop.create_task(client.download_media(message, file_save_path))
             # 等待阻塞 等待下载
             await asyncio.wait_for(task, timeout=3300)
-            os.close(file_save_path)
+            # os.close(file_save_path)
         except (errors.rpc_errors_re.FileReferenceExpiredError, asyncio.TimeoutError):
             logging.warning(f'{get_local_time()} - {file_name} 出现异常，重新尝试下载！')
             async for new_message in client.iter_messages(entity=entity, offset_id=message.id - 1, reverse=True,
@@ -152,7 +152,7 @@ async def worker(name):
         finally:
             queue.task_done()
             # 关闭文件
-            os.close(file_save_path)
+            # os.close(file_save_path)
 
 
 # 接受到/sl  查询队列数量
