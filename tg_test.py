@@ -139,16 +139,18 @@ async def worker(name):
         file_save_path = save_path + '/' + chat_title + '/' + file_type + '/' + file_name
 
         try:
+            # 取出队列
+            queue.task_done()
             # loop = asyncio.get_event_loop()
             # # 开启下载
+            
             task = loop.create_task(client.download_media(message, file_save_path))
             # 等待阻塞 等待下载
             await asyncio.wait_for(task, timeout=1200)
             # os.close(file_save_path)
 
-
             # 插入数据库
-            pd = set(file_type, file_name, file_save_path, chat_title,chat_id, file_id)
+            pd = set(file_type, file_name, file_save_path, chat_title, chat_id, file_id)
 
         except (errors.rpc_errors_re.FileReferenceExpiredError, asyncio.TimeoutError):
             logging.warning(f'{get_local_time()} - {file_name} 出现异常，重新尝试下载！')
@@ -159,10 +161,9 @@ async def worker(name):
             print(f"{get_local_time()} - {file_name} {e.__class__} {e}")
             await bot.send_message(admin_id, f'{e.__class__}!\n\n{e}\n\n{file_name}')
         finally:
-            await queue.task_done()
-            
-
-
+            # queue.task_done()
+            a = 1
+            # print()
             # 关闭文件
             # os.close(file_save_path)
 
@@ -264,12 +265,11 @@ async def handler(update):
 
             # 监听任务队列长度 因为一个频道有的好几万消息 不可能全部加入到队列
             # 只能一次加入多少 然后等待队列中的任务消耗完毕在继续添加
-            if await queue.qsize() == 2:
+            if queue.qsize() == 2:
                 # 阻塞调用线程，直到队列中的所有任务被处理掉。
                 await queue.join()
                 dq = message.id
                 print("继续获取任务......................")
-
 
             # 判断是否是媒体类型
             if message.media:
@@ -304,7 +304,7 @@ async def handler(update):
 
                 # 查询数据库 没有下载过才下载
                 if True:
-                # if get(file_id):
+                    # if get(file_id):
                     # 生成文件名 不含后缀
                     caption = ''.join(str(uuid.uuid4()).split('-'))
 
