@@ -303,7 +303,8 @@ async def handler(update):
                     file_id = message.media.document.id
 
                 # 查询数据库 没有下载过才下载
-                if get(file_id):
+                if True:
+                # if get(file_id):
                     # 生成文件名 不含后缀
                     caption = ''.join(str(uuid.uuid4()).split('-'))
 
