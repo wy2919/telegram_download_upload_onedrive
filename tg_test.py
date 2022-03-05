@@ -160,7 +160,7 @@ async def worker(name):
             await bot.send_message(admin_id, f'{e.__class__}!\n\n{e}\n\n{file_name}')
         finally:
             await queue.task_done()
-
+            
 
 
             # 关闭文件
@@ -264,7 +264,7 @@ async def handler(update):
 
             # 监听任务队列长度 因为一个频道有的好几万消息 不可能全部加入到队列
             # 只能一次加入多少 然后等待队列中的任务消耗完毕在继续添加
-            if queue.qsize() == 2:
+            if await queue.qsize() == 2:
                 # 阻塞调用线程，直到队列中的所有任务被处理掉。
                 await queue.join()
                 dq = message.id
