@@ -15,9 +15,6 @@ from telethon.tl.types import MessageMediaWebPage, PeerChannel, InputMessagesFil
     InputMessagesFilterPhotoVideo
 import cryptg
 
-
-
-
 # github : https://github.com/snow922841/telegram_channel_downloader
 
 # ***********************************************************************************#
@@ -49,7 +46,7 @@ dq = 0
 K_ID = 1
 
 # 要下载的文件格式
-accept_file_format = ["image/jpeg", "image/gif", "image/png",'video/mp4']
+accept_file_format = ["image/jpeg", "image/gif", "image/png", 'video/mp4']
 
 # 根据客户端不同路径也不同
 sysstr = platform.system()
@@ -99,6 +96,7 @@ def bytes_to_string(byte_count):
         byte_count, [' bytes', 'KB', 'MB', 'GB', 'TB'][suffix_index]
     )
 
+
 # 下载方法
 async def worker(name):
     # 一直循环从队列获取任务
@@ -128,26 +126,21 @@ async def worker(name):
         # 取出频道名称
         chat_title = queue_item[5]
 
-
         print(f"{name}  {get_local_time()} 开始下载： {chat_title} - {file_name} - {str(message.id)}")
 
         file_type = str(os.path.splitext(file_name)[-1]).split('.')[1]
 
         # 拼接文件保存路径
         # file_save_path = file_name
-        file_save_path = save_path + '/' +chat_title+'/'+ file_type + file_name
-
+        file_save_path = save_path + '/' + chat_title + '/' + file_type + '/' + file_name
 
         try:
             # loop = asyncio.get_event_loop()
             # # 开启下载
-            task = loop.create_task(client.download_media(message,file_save_path))
+            task = loop.create_task(client.download_media(message, file_save_path))
             # 等待阻塞 等待下载
             await asyncio.wait_for(task, timeout=3300)
             os.close(file_save_path)
-
-
-
         except (errors.rpc_errors_re.FileReferenceExpiredError, asyncio.TimeoutError):
             logging.warning(f'{get_local_time()} - {file_name} 出现异常，重新尝试下载！')
             async for new_message in client.iter_messages(entity=entity, offset_id=message.id - 1, reverse=True,
@@ -163,13 +156,13 @@ async def worker(name):
 
 
 # 接受到/sl  查询队列数量
-@events.register(events.NewMessage(pattern='/sl'+str(K_ID), from_users=admin_id))
+@events.register(events.NewMessage(pattern='/sl' + str(K_ID), from_users=admin_id))
 async def get_size(update):
     await bot.send_message(admin_id, f'任务队列数量：{queue.qsize()} 消息id：{str(dq)}')
 
 
 # 接受到/start
-@events.register(events.NewMessage(pattern='/start'+str(K_ID), from_users=admin_id))
+@events.register(events.NewMessage(pattern='/start' + str(K_ID), from_users=admin_id))
 async def handler(update):
     # tg接受到的命令 ：/start https://t.me/chigua91 10
     # 分割好
@@ -195,7 +188,6 @@ async def handler(update):
             entity = await client.get_entity(chat_id_name)
             # 获取频道名称
             chat_title = entity.title
-
 
             # 返回消息 回复上一条
             await update.reply(f'开始从 {chat_title} 的第 {0} 条消息下载')
@@ -253,10 +245,10 @@ async def handler(update):
     if chat_title:
         print(f'{get_local_time()} - 开始下载：{chat_title}({entity.id}) - {offset_id}')
 
-
         # 获取频道的消息 参数1：频道实体 参数2：从第几个消息开始获取 reverse（True/False）：true从最久远的消息到现在 false从现在往之前获取
         # filter：消息过滤器（只获取照片和视频），详情：https://tl.telethon.dev/constructors/input_messages_filter_photos.html
-        async for message in client.iter_messages(entity, offset_id=offset_id, reverse=True, limit=None,filter=	InputMessagesFilterPhotoVideo):
+        async for message in client.iter_messages(entity, offset_id=offset_id, reverse=True, limit=None,
+                                                  filter=InputMessagesFilterPhotoVideo):
 
             # 监听任务队列长度 因为一个频道有的好几万消息 不可能全部加入到队列
             # 只能一次加入多少 然后等待队列中的任务消耗完毕在继续添加
@@ -264,7 +256,6 @@ async def handler(update):
                 # 阻塞调用线程，直到队列中的所有任务被处理掉。
                 await queue.join()
                 dq = message.id
-
 
             # 判断是否是媒体类型
             if message.media:
@@ -278,7 +269,7 @@ async def handler(update):
                 # print(message.media)
 
                 # 判断媒体是否是受支持的
-                if not is_photo :  # 不是照片 一定是文件或者是网页
+                if not is_photo:  # 不是照片 一定是文件或者是网页
                     if is_doc:  # 如果是文件 判断文件类型
                         is_accept_media = message.media.document.mime_type in accept_file_format  # 检查文件类型是否属于支持的文件类型
 
@@ -296,7 +287,6 @@ async def handler(update):
                 else:
                     # file_size = message.media.document.size
                     file_id = message.media.document.id
-
 
                 # 生成文件名 不含后缀
                 caption = ''.join(str(uuid.uuid4()).split('-'))
@@ -326,10 +316,10 @@ async def handler(update):
                     continue
 
                 # 添加进队列 参数1：要下载的消息 参数2：频道标题  参数3：频道实体 参数4：文件名 参数5：文件id 参数6：频道名称
-                await queue.put((message, chat_title, entity, file_name,file_id,chat_title))
+                await queue.put((message, chat_title, entity, file_name, file_id, chat_title))
                 # else:
                 #     print()
-                    # print("已上传跳过："+str(file_id))
+                # print("已上传跳过："+str(file_id))
 
         await bot.send_message(admin_id, f'{chat_title} 所有消息添加到任务队列 数量：{queue.qsize()}')
 
@@ -404,7 +394,6 @@ if __name__ == '__main__':
     # 添加监听方法
     bot.add_event_handler(get_size)
     bot.add_event_handler(handler)
-
 
     # 是否监听所有频道
     if download_all_chat:
