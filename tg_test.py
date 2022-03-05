@@ -142,6 +142,8 @@ async def worker(name):
             task = loop.create_task(client.download_media(message,file_save_path))
             # 等待阻塞 等待下载
             await asyncio.wait_for(task, timeout=3300)
+            os.close(file_save_path)
+
 
 
         except (errors.rpc_errors_re.FileReferenceExpiredError, asyncio.TimeoutError):
