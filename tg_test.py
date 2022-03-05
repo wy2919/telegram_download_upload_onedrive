@@ -24,7 +24,7 @@ api_hash = '03e02666b77ced60cab759d4c31c488d'  # api hash
 bot_token = '5285482606:AAHIerhotb28ozU1L3UCS4kyfFLNZM3PA7o'  # bot_token
 admin_id = 1762277767  # 我的id  去这个机器人获取：@getidsbot
 upload_file_set = True  # 是否上传网盘
-max_num = 7  # 同时下载数量
+max_num = 10  # 同时下载数量
 # filter file name/文件名过滤
 filter_list = ['你好，欢迎加入 Quantumu', '\n']
 # filter chat id /过滤某些频道不下载
