@@ -157,7 +157,8 @@ async def worker(name):
         finally:
             queue.task_done()
             # 无论是否上传成功都删除文件。
-            os.remove(file_save_path)
+            # os.remove(file_save_path)
+            os.close(file_save_path)
 
 
 # 接受到/sl  查询队列数量
