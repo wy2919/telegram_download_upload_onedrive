@@ -159,7 +159,7 @@ async def worker(name):
             print(f"{get_local_time()} - {file_name} {e.__class__} {e}")
             await bot.send_message(admin_id, f'{e.__class__}!\n\n{e}\n\n{file_name}')
         finally:
-            queue.task_done()
+            await queue.task_done()
 
 
 
