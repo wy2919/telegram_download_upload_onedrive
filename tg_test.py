@@ -15,6 +15,10 @@ from telethon.tl.types import MessageMediaWebPage, PeerChannel, InputMessagesFil
     InputMessagesFilterPhotoVideo
 import cryptg
 
+# 导入的另一个py文件中的方法
+from mysql_test import get
+from mysql_test import set
+
 # github : https://github.com/snow922841/telegram_channel_downloader
 
 # ***********************************************************************************#
@@ -139,8 +143,13 @@ async def worker(name):
             # # 开启下载
             task = loop.create_task(client.download_media(message, file_save_path))
             # 等待阻塞 等待下载
-            await asyncio.wait_for(task, timeout=3300)
+            await asyncio.wait_for(task, timeout=1200)
             # os.close(file_save_path)
+
+
+            # 插入数据库
+            pd = set(file_type, file_name, file_save_path, chat_title,chat_id, file_id)
+
         except (errors.rpc_errors_re.FileReferenceExpiredError, asyncio.TimeoutError):
             logging.warning(f'{get_local_time()} - {file_name} 出现异常，重新尝试下载！')
             async for new_message in client.iter_messages(entity=entity, offset_id=message.id - 1, reverse=True,
@@ -151,6 +160,9 @@ async def worker(name):
             await bot.send_message(admin_id, f'{e.__class__}!\n\n{e}\n\n{file_name}')
         finally:
             queue.task_done()
+
+
+
             # 关闭文件
             # os.close(file_save_path)
 
@@ -288,38 +300,42 @@ async def handler(update):
                     # file_size = message.media.document.size
                     file_id = message.media.document.id
 
-                # 生成文件名 不含后缀
-                caption = ''.join(str(uuid.uuid4()).split('-'))
+                # 查询数据库 没有下载过才下载
+                if get(file_id):
+                    # 生成文件名 不含后缀
+                    caption = ''.join(str(uuid.uuid4()).split('-'))
 
-                file_name = ''
+                    file_name = ''
 
-                # 如果是文件
-                if message.document:
-                    # 遍历获取原始文件名
-                    for i in message.document.attributes:
-                        try:
-                            file_name = i.file_name
-                        except:
-                            continue
-                    # 如果获取不到原始文件名 也就是获取不到后缀 就从类型中获取后缀
-                    if file_name == '':
-                        file_name = f'{caption}.{message.document.mime_type.split("/")[-1]}'
+                    # 如果是文件
+                    if message.document:
+                        # 遍历获取原始文件名
+                        for i in message.document.attributes:
+                            try:
+                                file_name = i.file_name
+                            except:
+                                continue
+                        # 如果获取不到原始文件名 也就是获取不到后缀 就从类型中获取后缀
+                        if file_name == '':
+                            file_name = f'{caption}.{message.document.mime_type.split("/")[-1]}'
+                        else:
+                            # 获取到了原始文件名 使用方法获取后缀
+                            hz = os.path.splitext(file_name)[-1]
+                            # 拼接文件名
+                            file_name = caption + hz
+                    elif message.photo:
+                        # 图片直接返回文件名
+                        file_name = f'{caption}.jpg'
                     else:
-                        # 获取到了原始文件名 使用方法获取后缀
-                        hz = os.path.splitext(file_name)[-1]
-                        # 拼接文件名
-                        file_name = caption + hz
-                elif message.photo:
-                    # 图片直接返回文件名
-                    file_name = f'{caption}.jpg'
-                else:
-                    continue
+                        continue
 
-                # 添加进队列 参数1：要下载的消息 参数2：频道标题  参数3：频道实体 参数4：文件名 参数5：文件id 参数6：频道名称
-                await queue.put((message, chat_title, entity, file_name, file_id, chat_title))
-                # else:
-                #     print()
-                # print("已上传跳过："+str(file_id))
+                    print("添加进")
+
+                    # 添加进队列 参数1：要下载的消息 参数2：频道标题  参数3：频道实体 参数4：文件名 参数5：文件id 参数6：频道名称
+                    await queue.put((message, chat_title, entity, file_name, file_id, chat_title))
+                    # else:
+                    #     print()
+                    # print("已上传跳过："+str(file_id))
 
         await bot.send_message(admin_id, f'{chat_title} 所有消息添加到任务队列 数量：{queue.qsize()}')
 
